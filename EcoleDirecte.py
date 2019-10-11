@@ -5,6 +5,17 @@ import argparse
 
 proxies = {}
 
+sep = ","
+
+def dump( champ, bulletProof ):
+    returnMe = ""
+    if ( bulletProof ):
+        returnMe = repr(str(champ.encode('utf8')))[2:-1]
+    else:
+        returnMe = "'" + str(champ) + "'"
+    returnMe = returnMe.replace("'", "\"")
+    return returnMe
+
 # fonction pour lister toutes les notes d'un eleve sur base de son ID
 def listeNote(eleve_id, eleve_prenom, token):
     payloadNotes = "data={\"token\": \"" + token + "\"}"
@@ -18,13 +29,31 @@ def listeNote(eleve_id, eleve_prenom, token):
 
     notesEnJSON = json.loads(r.content)
     if len(notesEnJSON['data']['notes']) > 0:
-        for note in notesEnJSON['data']['notes']:
-            nomDuFichier = eleve_prenom + '-' + note['codePeriode'] + '.csv'
-            with open(nomDuFichier, "a") as n:
-                n.write(str(note['libelleMatiere'].encode('utf8')) + ";" + str(note['date'].encode('utf8')) + ";" + str(
-                    note['valeur'].encode('utf8')) + ";" + str(note['noteSur'].encode('utf8')) + ";" + str(
-                    note['coef'].encode('utf8')) + ";" + str(note['typeDevoir'].encode('utf8')) + ";" + str(
-                    note['devoir'].encode('utf8')) + "\n")
+        nomDuFichier = eleve_prenom + '.csv'
+        with open(nomDuFichier, "a") as n:
+            n.write(
+                'periode'
+                + sep + 'libelleMatiere'
+                + sep + 'valeur'
+                + sep + 'noteSur'
+                + sep + 'coef'
+                + sep + 'typeDevoir'
+                + sep + 'devoir'
+                + sep + 'date'
+                + "\n"
+            )
+            for note in notesEnJSON['data']['notes']:
+                n.write(
+                            dump(note['codePeriode'], False)
+                    + sep + dump(note['libelleMatiere'], True)
+                    + sep + dump(note['valeur'].replace(",", "."), False)
+                    + sep + dump(note['noteSur'], True)
+                    + sep + dump(note['coef'], True)
+                    + sep + dump(note['typeDevoir'], False)
+                    + sep + dump(note['devoir'], False)
+                    + sep + dump(note['date'], True)
+                    + "\n"
+                )
     else:
         print("pas de notes encore")
     return
