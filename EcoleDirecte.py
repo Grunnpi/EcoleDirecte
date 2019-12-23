@@ -175,6 +175,7 @@ if __name__ == "__main__":
     #print(args.user)
     #print(args.pwd)
     #print(args.proxy)
+    print("sboub")
 
     if args.proxy:
         print("Proxy provided")
