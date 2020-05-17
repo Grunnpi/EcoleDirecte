@@ -162,18 +162,20 @@ def listeNoteSite(eleve_id, token):
 # partie principale
 if __name__ == "__main__":
 
-    parser=argparse.ArgumentParser()
+    parser=argparse.ArgumentParser(description='Ecole Direct extact process')
 
     # Ecole Directe cred
-    parser.add_argument('--user', help='User', type=str)
-    parser.add_argument('--pwd', help='Password', type=str)
-    parser.add_argument('--proxy', help='https://uzer:pwd@name:port', type=str, default="")
+    parser.add_argument('--user', help='ED User', type=str, required=True)
+    parser.add_argument('--pwd', help='ED Password', type=str, required=True)
+    parser.add_argument('--proxy', help='Proxy if behind firewall : https://uzer:pwd@name:port', type=str, default="")
     # credential google
-    parser.add_argument('--cred', help='true', type=str, default="")
+    parser.add_argument('--cred', help='Google Drive json credential file', type=str, required=True)
     # telegram mode
-    parser.add_argument('--token', help='true', type=str, default="")
-    parser.add_argument('--chatid', help='true', type=str, default="")
-    parser.add_argument('--telegram', help='true', type=str, default="no")
+    parser.add_argument('--token', help='Telegram bot token', type=str, default="")
+    parser.add_argument('--chatid', help='Telegram chatid', type=str, default="")
+    parser.add_argument('--telegram', help='Telegram flag (use or not)', type=str, default="no")
+
+    parser.print_help()
 
     args=parser.parse_args()
 

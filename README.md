@@ -15,4 +15,4 @@ Here it is
 
 # Usage
 
-``python EcoleDirecte.py --user=MyUser --pwd=MyCredz --proxy=https://uzer:pwd@name:port``
+``python EcoleDirecte.py --user=MyUser --pwd=MyCredz --proxy=https://uzer:pwd@name:port --cred="googledrive.json""``
