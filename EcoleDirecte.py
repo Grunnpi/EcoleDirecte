@@ -16,7 +16,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-EcoleDirectVersion = 'v1.0'
+EcoleDirectVersion = 'v2'
 
 proxies = {}
 sep = ","
@@ -135,7 +135,7 @@ def listeNoteSite(eleve_id, token):
 
     payloadNotes = "data={\"token\": \"" + token + "\"}"
     headersNotes = {'content-type': 'application/x-www-form-urlencoded'}
-    r = requests.post("https://vmws17.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&",
+    r = requests.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&",
                       data=payloadNotes, headers=headersNotes, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
@@ -147,7 +147,7 @@ def listeNoteSite(eleve_id, token):
                 ,   note['libelleMatiere'] \
                 ,   note['valeur'].replace(".", ",") \
                 ,   note['noteSur'] \
-                ,   note['coef'] \
+                ,   note['coef'].replace(".", ",") \
                 ,   note['typeDevoir'] \
                 ,   note['devoir'] \
                 ,   note['date'] \
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     payload = urllib.parse.quote_plus(payload)
     #print(payload)
 
-    r = requests.post("https://vmws06.ecoledirecte.com/v3/login.awp", data=payload, headers=headers, proxies=proxies, verify=False)
+    r = requests.post("https://api.ecoledirecte.com/v3/login.awp", data=payload, headers=headers, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
     retourEnJson = json.loads(r.content)
@@ -249,17 +249,17 @@ if __name__ == "__main__":
                     if ( not isNoteSiteDejaSurGoogle ):
                         print("Ajoute %s" % uneNoteSite.valeur, " @ ligne %d" % googleNextRow)
                         theValeur = uneNoteSite.valeur
-                        if ( uneNoteSite.valeur.isnumeric()):
-                            theValeur = float(theValeur)
+                        if ( uneNoteSite.valeur.replace(",", ".").isnumeric()):
+                            theValeur = float(theValeur.replace(",", "."))
                         theNoteSur = uneNoteSite.noteSur
-                        if ( uneNoteSite.noteSur.isnumeric()):
-                            theNoteSur = float(theNoteSur)
+                        if ( uneNoteSite.noteSur.replace(",", ".").isnumeric()):
+                            theNoteSur = float(theNoteSur.replace(",", "."))
                         theCoef = uneNoteSite.coef
-                        if ( uneNoteSite.coef.isnumeric()):
-                            theCoef = float(theCoef)
+                        if ( uneNoteSite.coef.replace(",", ".").isnumeric()):
+                            theCoef = float(theCoef.replace(",", "."))
 
-                        row = [uneNoteSite.periode, uneNoteSite.libelleMatiere, theValeur, theNoteSur, theCoef, uneNoteSite.typeDevoir, uneNoteSite.devoir, uneNoteSite.date]
-                        print(sheet_ongleNotes.insert_row(row, googleNextRow))
+                        row = [uneNoteSite.periode, uneNoteSite.libelleMatiere, theValeur, theNoteSur, theCoef, uneNoteSite.typeDevoir, uneNoteSite.devoir, uneNoteSite.date, '=SI(ESTNUM(C' + str(googleNextRow) + ');C' + str(googleNextRow) + '/D' + str(googleNextRow) + '*20;NA())', '=I' + str(googleNextRow) + '*E' + str(googleNextRow) + '', '=SI(ESTNUM(I' + str(googleNextRow) + ');ET(VRAI;M' + str(googleNextRow) + ');FAUX)', '=GAUCHE(A' + str(googleNextRow) + ';4)','VRAI']
+                        print(sheet_ongleNotes.insert_row(row, googleNextRow, 'USER_ENTERED'))
                         googleNextRow = googleNextRow + 1
                         nbCreate = nbCreate + 1
                     else:
