@@ -240,6 +240,7 @@ if __name__ == "__main__":
                 print("Notes dans google[", len(eleveNotesDansGoogle), "] / notes sur site [", len(eleveNotesDansSite), "]")
                 googleNextRow = len(eleveNotesDansGoogle) + 2 # header + new row
 
+                inventaireNote = ""
                 for uneNoteSite in eleveNotesDansSite:
                     isNoteSiteDejaSurGoogle = False
                     for uneNoteGoogle in eleveNotesDansGoogle:
@@ -258,6 +259,7 @@ if __name__ == "__main__":
                         if ( uneNoteSite.coef.replace(",", ".").isnumeric()):
                             theCoef = float(theCoef.replace(",", "."))
 
+                        inventaireNote = inventaireNote + "\n " + uneNoteSite.libelleMatiere.lower() + " " + str(theValeur) + "/" + str(theNoteSur) + " (" + str(theCoef) + ")"
                         row = [uneNoteSite.periode, uneNoteSite.libelleMatiere, theValeur, theNoteSur, theCoef, uneNoteSite.typeDevoir, uneNoteSite.devoir, uneNoteSite.date, '=SI(ESTNUM(C' + str(googleNextRow) + ');C' + str(googleNextRow) + '/D' + str(googleNextRow) + '*20;NA())', '=I' + str(googleNextRow) + '*E' + str(googleNextRow) + '', '=SI(ESTNUM(I' + str(googleNextRow) + ');ET(VRAI;M' + str(googleNextRow) + ');FAUX)', '=GAUCHE(A' + str(googleNextRow) + ';4)','VRAI']
                         print(sheet_ongleNotes.insert_row(row, googleNextRow, 'USER_ENTERED'))
                         googleNextRow = googleNextRow + 1
@@ -265,8 +267,9 @@ if __name__ == "__main__":
                     else:
                         print("Note %s" % uneNoteSite.valeur, " @ déjà présente")
                 print("Nombre de notes ajoutées pour ",elevePrenom," = ", nbCreate)
-                telegram_message = telegram_message + " / "  + elevePrenom + ":`" + str(nbCreate) + "`"
-
+                telegram_message = telegram_message + "\n *"  + elevePrenom + "* :`" + str(nbCreate) + "`"
+                if ( nbCreate > 0 ):
+                    telegram_message = telegram_message + inventaireNote
                 break
         if ( not trouveEleve ):
             print(">> Eleve config non trouvé !!")
