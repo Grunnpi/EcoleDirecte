@@ -47,7 +47,8 @@ class UneNote:
     typeDevoir = ''
     devoir = ''
     date = ''
-    def __init__(self, periode, libelleMatiere,valeur,noteSur,coef,typeDevoir,devoir,date):
+    nonSignificatif = False
+    def __init__(self, periode, libelleMatiere,valeur,noteSur,coef,typeDevoir,devoir,date,nonSignificatif):
         self.periode = periode
         self.libelleMatiere = libelleMatiere
         self.valeur = valeur
@@ -56,6 +57,7 @@ class UneNote:
         self.typeDevoir = typeDevoir
         self.devoir = devoir
         self.date = date
+        self.nonSignificatif = nonSignificatif
     def __eq__(self, other):
         """Comparaison de deux notes"""
         return self.periode == other.periode \
@@ -105,7 +107,7 @@ def listeNoteGoogle(sheetOnglet):
     all_kid_notes_sheet = sheetOnglet.get_all_records()
     #
     for rec in all_kid_notes_sheet:
-        uneNote = UneNote('', '', '', '', '', '', '', '')
+        uneNote = UneNote('', '', '', '', '', '', '', '','')
         for item in rec.items():
             # print(item[0], " -- ", item[1], "<", item, ">",)
             if ( item[0] == 'periode'):
@@ -151,6 +153,7 @@ def listeNoteSite(eleve_id, token):
                 ,   note['typeDevoir'] \
                 ,   note['devoir'] \
                 ,   note['date'] \
+                ,   note['nonSignificatif'] \
                 )
             all_kid_notes.append(uneNote)
         all_kid_notes = sorted(all_kid_notes)
@@ -259,8 +262,13 @@ if __name__ == "__main__":
                         if ( uneNoteSite.coef.replace(",", ".").isnumeric()):
                             theCoef = float(theCoef.replace(",", "."))
 
+                        VRAI_NOTE = 'TRUE'
                         inventaireNote = inventaireNote + "\n " + uneNoteSite.libelleMatiere.lower() + " " + str(theValeur) + "/" + str(theNoteSur) + " (" + str(theCoef) + ")"
-                        row = [uneNoteSite.periode, uneNoteSite.libelleMatiere, theValeur, theNoteSur, theCoef, uneNoteSite.typeDevoir, uneNoteSite.devoir, uneNoteSite.date, '=SI(ESTNUM(C' + str(googleNextRow) + ');C' + str(googleNextRow) + '/D' + str(googleNextRow) + '*20;NA())', '=I' + str(googleNextRow) + '*E' + str(googleNextRow) + '', '=SI(ESTNUM(I' + str(googleNextRow) + ');ET(VRAI;M' + str(googleNextRow) + ');FAUX)', '=GAUCHE(A' + str(googleNextRow) + ';4)','VRAI']
+                        if ( uneNoteSite.nonSignificatif == True ):
+                            VRAI_NOTE = 'FALSE'
+                            inventaireNote = inventaireNote + "_ns_"
+
+                        row = [uneNoteSite.periode, uneNoteSite.libelleMatiere, theValeur, theNoteSur, theCoef, uneNoteSite.typeDevoir, uneNoteSite.devoir, uneNoteSite.date, '=SI(ESTNUM(C' + str(googleNextRow) + ');C' + str(googleNextRow) + '/D' + str(googleNextRow) + '*20;NA())', '=I' + str(googleNextRow) + '*E' + str(googleNextRow) + '', '=SI(ESTNUM(I' + str(googleNextRow) + ');ET(VRAI;M' + str(googleNextRow) + ');FAUX)', '=GAUCHE(A' + str(googleNextRow) + ';4)',VRAI_NOTE]
                         print(sheet_ongleNotes.insert_row(row, googleNextRow, 'USER_ENTERED'))
                         googleNextRow = googleNextRow + 1
                         nbCreate = nbCreate + 1
