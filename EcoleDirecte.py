@@ -21,7 +21,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-EcoleDirectVersion = 'v3'
+EcoleDirectVersion = 'v4'
 
 proxies = {}
 sep = ","
@@ -67,7 +67,7 @@ class UneNote:
         """Comparaison de deux notes"""
         return self.periode == other.periode \
                and self.libelleMatiere == other.libelleMatiere \
-               and self.devoir == other.devoir \
+               and str(self.devoir) == str(other.devoir) \
                and self.date == other.date
     def __lt__(self, other):
         """Trie de deux notes"""
