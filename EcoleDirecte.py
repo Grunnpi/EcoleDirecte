@@ -6,6 +6,10 @@ import csv
 import os.path
 import urllib.parse
 import sys
+import logging
+import http.client as http_client
+from http.client import HTTPConnection
+
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -136,13 +140,14 @@ def listeNoteGoogle(sheetOnglet):
 def listeNoteSite(eleve_id, token):
     all_kid_notes = []
 
-    payloadNotes = "data={\"token\": \"" + token + "\"}"
-    headersNotes = {'content-type': 'application/x-www-form-urlencoded'}
-    r = requests.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&",
+    payloadNotes = "data={\"anneeScolaire\": \"\"}"
+    headersNotes = {'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'content-type': 'application/x-www-form-urlencoded','X-Token':token}
+    r = requests.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&v=4.33.0",
                       data=payloadNotes, headers=headersNotes, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
     notesEnJSON = json.loads(r.content)
+    print(notesEnJSON)
     if len(notesEnJSON['data']['notes']) > 0:
         for note in notesEnJSON['data']['notes']:
             uneNote = UneNote( \
@@ -179,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument('--chatid', help='Telegram chatid', type=str, default="")
     parser.add_argument('--telegram', help='Telegram flag (use or not)', type=str, default="no")
 
-    parser.print_help()
+    #parser.print_help()
 
     args=parser.parse_args()
 
@@ -211,15 +216,35 @@ if __name__ == "__main__":
             "https": str(args.proxy)
         }
 
-    payload = "data={\"identifiant\": \"" + str(args.user) + "\", \"motdepasse\" : \"" + str(args.pwd) + "\"}"
-    headers = {'content-type': 'application/x-www-form-urlencoded'}
-    payload = urllib.parse.quote_plus(payload)
-    #print(payload)
 
-    r = requests.post("https://api.ecoledirecte.com/v3/login.awp", data=payload, headers=headers, proxies=proxies, verify=False)
+    http_client.HTTPConnection.debuglevel = 1
+
+    # You must initialize logging, otherwise you'll not see debug output.
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    #requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
+    HTTPConnection.debuglevel = 1
+
+    headers = {'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'content-type': 'application/x-www-form-urlencoded', 'Accept':'application/json, text/plain, */*', 'Origin':'https://www.ecoledirecte.com', 'Referer':'https://www.ecoledirecte.com/'}
+#    headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'}
+    payload = "data={\"uuid\": \"\", \"identifiant\": \"" + str(args.user) + "\", \"motdepasse\" : \"" + urllib.parse.quote_plus(str(args.pwd)) + "\", \"isReLogin\": false}"
+#    payload = 'data={"uuid": "", "identifiant": "hardcodeme", "motdepasse": "hardcodedstuff", "isReLogin": false }'
+    print("*X***********************")
+    print(payload)
+    print("*XX***********************")
+
+    r = requests.post("https://api.ecoledirecte.com/v3/login.awp?v=4.33.0", data=payload, headers=headers, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
+    print("************************")
+    print(r.content)
     retourEnJson = json.loads(r.content)
+    print(retourEnJson['code'])
+    if ( retourEnJson['code']!=200):
+        print(">>>>>>>>>>> Error / stop ")
+        exit(-1)
     print("Generation des fichiers ici : [" + os.getcwd() + "]")
 
     telegram_message = "*EcoleDirect(" + EcoleDirectVersion + ")* "
