@@ -229,13 +229,13 @@ if __name__ == "__main__":
 
     headers = {'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'content-type': 'application/x-www-form-urlencoded', 'Accept':'application/json, text/plain, */*', 'Origin':'https://www.ecoledirecte.com', 'Referer':'https://www.ecoledirecte.com/'}
 #    headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'}
-    payload = "data={\"uuid\": \"\", \"identifiant\": \"" + str(args.user) + "\", \"motdepasse\" : \"" + urllib.parse.quote_plus(str(args.pwd)) + "\", \"isReLogin\": false}"
+    payload = "data={\"uuid\": \"\", \"identifiant\": \"" + str(args.user) + "\", \"motdepasse\" : \"" + urllib.parse.quote_plus(str(args.pwd)) + "\", \"isReLogin\": false, \"uuid\":\"\", \"fa\" : [{ \"cn\":\"ED_UExVTUVfMDU3MjkzMUJfMV8xODkw\", \"cv\": \"Njc2NzM1NTc3NTQ3NGM0ZDUwNmM0MTQ2NTUyYjMwNmU0ODcwNjg2YTZjMzI0MjQ1N2EyZjQzNTk=\" }] }"
 #    payload = 'data={"uuid": "", "identifiant": "hardcodeme", "motdepasse": "hardcodedstuff", "isReLogin": false }'
     print("*X***********************")
     print(payload)
     print("*XX***********************")
 
-    r = requests.post("https://api.ecoledirecte.com/v3/login.awp?v=4.33.0", data=payload, headers=headers, proxies=proxies, verify=False)
+    r = requests.post("https://api.ecoledirecte.com/v3/login.awp?v=4.57.1", data=payload, headers=headers, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
     print("************************")
