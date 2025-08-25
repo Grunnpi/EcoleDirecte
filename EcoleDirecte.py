@@ -21,7 +21,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-EcoleDirectVersion = 'v4'
+EcoleDirectVersion = 'v5'
+
+ecoleDirecteVersion="4.82.2"
 
 proxies = {}
 sep = ","
@@ -142,7 +144,7 @@ def listeNoteSite(eleve_id, token):
 
     payloadNotes = "data={\"anneeScolaire\": \"\"}"
     headersNotes = {'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'content-type': 'application/x-www-form-urlencoded','X-Token':token}
-    r = requests.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&v=4.33.0",
+    r = requests.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&v=" + ecoleDirecteVersion,
                       data=payloadNotes, headers=headersNotes, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
@@ -228,14 +230,29 @@ if __name__ == "__main__":
     HTTPConnection.debuglevel = 1
 
     headers = {'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'content-type': 'application/x-www-form-urlencoded', 'Accept':'application/json, text/plain, */*', 'Origin':'https://www.ecoledirecte.com', 'Referer':'https://www.ecoledirecte.com/'}
+
+    mySession = requests.Session()
+
+    r = mySession.get("https://api.ecoledirecte.com/v3/login.awp?gtk=1&v=" + ecoleDirecteVersion, headers=headers, proxies=proxies, verify=False)
+    if r.status_code != 200:
+        print(r.status_code, r.reason)
+
+    print("GTK", mySession.cookies.get("GTK"))
+
+    new_header =  {
+        "X-GTK": mySession.cookies.get("GTK")
+    }
+    headers.update(new_header)
+
+
 #    headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'}
-    payload = "data={\"uuid\": \"\", \"identifiant\": \"" + str(args.user) + "\", \"motdepasse\" : \"" + urllib.parse.quote_plus(str(args.pwd)) + "\", \"isReLogin\": false, \"uuid\":\"\", \"fa\" : [{ \"cn\":\"ED_UExVTUVfMDU3MjkzMUJfMV8xODkw\", \"cv\": \"Njc2NzM1NTc3NTQ3NGM0ZDUwNmM0MTQ2NTUyYjMwNmU0ODcwNjg2YTZjMzI0MjQ1N2EyZjQzNTk=\" }] }"
+    payload = "data={ \"identifiant\": \"" + str(args.user) + "\", \"motdepasse\" : \"" + urllib.parse.quote(str(args.pwd),safe="=") + "\", \"isReLogin\": false, \"uuid\":\"\", \"fa\" : [{ \"cn\":\"ED_UExVTUVfMDU3MjkzMUJfMV8xODkw\", \"cv\": \"Njc2NzM1NTc3NTQ3NGM0ZDUwNmM0MTQ2NTUyYjMwNmU0ODcwNjg2YTZjMzI0MjQ1N2EyZjQzNTk=\" }] }"
 #    payload = 'data={"uuid": "", "identifiant": "hardcodeme", "motdepasse": "hardcodedstuff", "isReLogin": false }'
     print("*X***********************")
     print(payload)
     print("*XX***********************")
 
-    r = requests.post("https://api.ecoledirecte.com/v3/login.awp?v=4.57.1", data=payload, headers=headers, proxies=proxies, verify=False)
+    r = mySession.post("https://api.ecoledirecte.com/v3/login.awp?v=" + ecoleDirecteVersion, data=payload, headers=headers, proxies=proxies, verify=False)
     if r.status_code != 200:
         print(r.status_code, r.reason)
     print("************************")
