@@ -370,5 +370,5 @@ if __name__ == "__main__":
 
     if ( str(args.telegram) == "yes" ) :
         bot = telegram.Bot(token=str(args.token))
-        bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
 
