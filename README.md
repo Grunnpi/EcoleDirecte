@@ -1,7 +1,7 @@
 # Introduction
 
 You have several kids in same school, and it's always messy to grab all grades in a row ?
-You are an csv maniac, and *NEED* to collect them all ?
+You are a csv maniac, and *NEED* to collect them all ?
 
 Here it is
 
