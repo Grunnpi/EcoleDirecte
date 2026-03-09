@@ -1,4 +1,20 @@
 #!/bin/bash
 echo "Lancement EcoleDirecte.py"
-#echo "$(ls)"
-python3 /config/my_scripts/EcoleDirecte/EcoleDirecte.py --user=Grunnagel --pwd=mdpspc1978+1976=4 --cred="/config/my_scripts/AuPair.json" --telegram=yes --token=714930347:AAHDNpKK24k7TwzRE4DW60zYgH4G0qqsR8Y --chatid=-339490946 > /config/my_scripts/EcoleDirecte/EcoleDirecte.log 2>&1 &
+
+# Lecture du fichier config
+CONFIG_FILE="/config/my_scripts/EcoleDirecte/config.txt"
+while read -r line; do
+    [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    declare "$key=$value"
+done < "$CONFIG_FILE"
+
+python3 /config/my_scripts/EcoleDirecte/EcoleDirecte.py \
+    --user="$user" \
+    --pwd="$pwd" \
+    --cred="/config/my_scripts/AuPair.json" \
+    --telegram=yes \
+    --token="$token" \
+    --chatid=-339490946 \
+    > /config/my_scripts/EcoleDirecte/EcoleDirecte.log 2>&1 &

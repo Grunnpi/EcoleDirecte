@@ -10,6 +10,8 @@ import logging
 import http.client as http_client
 from http.client import HTTPConnection
 
+import asyncio
+
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -21,7 +23,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-EcoleDirectVersion = 'v5.1'
+EcoleDirectVersion = 'v5.2'
 
 
 readFile = False #bypass direct api fetch
@@ -161,7 +163,7 @@ def listeNoteGoogle(sheetOnglet):
     return all_kid_notes
 
 # fonction pour lister toutes les notes d'un eleve sur base de son ID
-def listeNoteSite(eleve_id, token):
+def listeNoteSite(mySession, eleve_id, token):
     all_kid_notes = []
 
     if readFile:
@@ -171,7 +173,7 @@ def listeNoteSite(eleve_id, token):
     else:
         payloadNotes = "data={\"anneeScolaire\": \"\"}"
         headersNotes = {'User-Agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1', 'content-type': 'application/x-www-form-urlencoded','X-Token':token}
-        r = requests.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&v=" + ecoleDirecteVersion,
+        r = mySession.post("https://api.ecoledirecte.com/v3/eleves/" + str(eleve_id) + "/notes.awp?verbe=get&v=" + ecoleDirecteVersion,
                           data=payloadNotes, headers=headersNotes, proxies=proxies, verify=False)
         if r.status_code != 200:
             print(r.status_code, r.reason)
@@ -313,7 +315,7 @@ if __name__ == "__main__":
                 sheet_ongleNotes = client.open("Notes_EcoleDirecte").worksheet(x.onglet)
                 eleveNotesDansGoogle = listeNoteGoogle(sheet_ongleNotes)
                 print(">>> Extract Site")
-                eleveNotesDansSite = listeNoteSite(eleveId, retourEnJson['token'])
+                eleveNotesDansSite = listeNoteSite(mySession, eleveId, retourEnJson['token'])
 
                 print("Notes dans google[", len(eleveNotesDansGoogle), "] / notes sur site [", len(eleveNotesDansSite), "]")
                 googleNextRow = len(eleveNotesDansGoogle) + 2 # header + new row
@@ -370,5 +372,5 @@ if __name__ == "__main__":
 
     if ( str(args.telegram) == "yes" ) :
         bot = telegram.Bot(token=str(args.token))
-        bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
-
+        result = bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
+        print("Telegram message envoyé, message_id:", result.message_id)
