@@ -370,7 +370,14 @@ if __name__ == "__main__":
             print(">> Eleve config non trouvé !!")
     print("Fin extraction.\nTotal nouvelles notes=" + str(compteurTotalNouvelleNote))
 
+    # if ( str(args.telegram) == "yes" ) :
+    #     bot = telegram.Bot(token=str(args.token))
+    #     result = bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
+    #     print("Telegram message envoyé, message_id:", result.message_id)
+
     if ( str(args.telegram) == "yes" ) :
-        bot = telegram.Bot(token=str(args.token))
-        result = bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
-        print("Telegram message envoyé, message_id:", result.message_id)
+        async def send_telegram():
+            bot = telegram.Bot(token=str(args.token))
+            result = await bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
+            print("Telegram message envoyé, message_id:", result.message_id)
+    asyncio.run(send_telegram())
