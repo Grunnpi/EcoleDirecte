@@ -23,7 +23,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-EcoleDirectVersion = 'v5.2'
+EcoleDirectVersion = 'v5.3'
 
 
 readFile = False #bypass direct api fetch
@@ -183,7 +183,7 @@ def listeNoteSite(mySession, eleve_id, token):
         for note in notesEnJSON['data']['notes']:
             uneNote = UneNote( \
                     note['codePeriode'] \
-                ,   note['libelleMatiere'] \
+                ,   ( (note['codeSousMatiere'] + "\\") if note['codeSousMatiere'] else "" )  + note['libelleMatiere'] \
                 ,   note['valeur'].replace(".", ",") \
                 ,   note['noteSur'] \
                 ,   note['coef'].replace(".", ",") \
@@ -198,6 +198,11 @@ def listeNoteSite(mySession, eleve_id, token):
         print("pas de notes encore")
     return all_kid_notes
 
+async def send_telegram(telegram_message):
+    print("Telegram message va être  envoyé")
+    bot = telegram.Bot(token=str(args.token))
+    result = await bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
+    print("Telegram message envoyé, message_id:", result.message_id)
 
 # partie principale
 if __name__ == "__main__":
@@ -376,8 +381,7 @@ if __name__ == "__main__":
     #     print("Telegram message envoyé, message_id:", result.message_id)
 
     if ( str(args.telegram) == "yes" ) :
-        async def send_telegram():
-            bot = telegram.Bot(token=str(args.token))
-            result = await bot.send_message(chat_id=str(args.chatid), text=telegram_message, parse_mode='Markdown')
-            print("Telegram message envoyé, message_id:", result.message_id)
-    asyncio.run(send_telegram())
+        print("avant appel asynchrone pour send_telegram")
+        asyncio.run(send_telegram(telegram_message))
+    else:
+        print("pas de send_telegram")
